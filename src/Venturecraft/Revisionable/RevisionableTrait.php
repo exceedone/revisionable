@@ -75,7 +75,7 @@ trait RevisionableTrait
             $model->postSave();
         });
 
-        static::created(function($model){
+        static::created(function ($model) {
             $model->postCreate();
         });
 
@@ -122,7 +122,14 @@ trait RevisionableTrait
             // we can only safely compare basic items,
             // so for now we drop any object based items, like DateTime
             foreach ($this->updatedData as $key => $val) {
-                if (gettype($val) == 'object' && !method_exists($val, '__toString')) {
+                if (isset($this->casts[$key]) && in_array($this->casts[$key], ['object', 'array', 'json']) && isset($this->originalData[$key])) {
+                    // Sorts the keys of a JSON object due Normalization performed by MySQL
+                    // So it doesn't set false flag if it is changed only order of key or whitespace after comma
+                    $updatedData = $this->getSortedJson($this->updatedData[$key]);
+                    $this->updatedData[$key] = json_encode($updatedData);
+                    $originalData = $this->getSortedJson($this->originalData[$key]);
+                    $this->originalData[$key] = json_encode($originalData);
+                } else if (gettype($val) == 'object' && !method_exists($val, '__toString')) {
                     unset($this->originalData[$key]);
                     unset($this->updatedData[$key]);
                     array_push($this->dontKeep, $key);
@@ -160,9 +167,9 @@ trait RevisionableTrait
         } else {
             $LimitReached = false;
         }
-        if (isset($this->revisionCleanup)){
+        if (isset($this->revisionCleanup)) {
             $RevisionCleanup=$this->revisionCleanup;
-        }else{
+        } else {
             $RevisionCleanup=false;
         }
 
@@ -188,9 +195,9 @@ trait RevisionableTrait
             }
 
             if (count($revisions) > 0) {
-                if($LimitReached && $RevisionCleanup){
-                    $toDelete = $this->revisionHistory()->orderBy('id','asc')->limit(count($revisions))->get();
-                    foreach($toDelete as $delete){
+                if ($LimitReached && $RevisionCleanup) {
+                    $toDelete = $this->revisionHistory()->orderBy('id', 'asc')->limit(count($revisions))->get();
+                    foreach ($toDelete as $delete) {
                         $delete->delete();
                     }
                 }
@@ -209,14 +216,12 @@ trait RevisionableTrait
 
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
-        if(empty($this->revisionCreationsEnabled))
-        {
+        if (empty($this->revisionCreationsEnabled)) {
             // We should not store creations.
             return false;
         }
 
-        if ((!isset($this->revisionEnabled) || $this->revisionEnabled))
-        {
+        if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
             $revisions[] = array(
                 'revisionable_type' => $this->getMorphClass(),
                 'revisionable_id' => $this->getKey(),
@@ -232,7 +237,6 @@ trait RevisionableTrait
             \DB::table($revision->getTable())->insert($revisions);
             \Event::fire('revisionable.created', array('model' => $this, 'revisions' => $revisions));
         }
-
     }
 
     /**
@@ -434,5 +438,37 @@ trait RevisionableTrait
             $this->dontKeepRevisionOf = $donts;
             unset($donts);
         }
+    }
+    
+    
+    /**
+     * get sorted jon object
+     *
+     * Normalization performed by MySQL and
+     * discards extra whitespace between keys, values, or elements
+     * in the original JSON document.
+     * To make lookups more efficient, it sorts the keys of a JSON object.
+     *
+     * @param mixed $attribute
+     *
+     * @return mixed
+     */
+    protected function getSortedJson($attribute)
+    {
+        if (empty($attribute)) {
+            return $attribute;
+        }
+        if(is_string($attribute)){
+            $attribute = json_decode($attribute, true);
+        }
+        foreach ($attribute as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+                $value = $this->sortJsonKeys($value);
+            } else {
+                continue;
+            }
+        }
+        ksort($attribute);
+        return $attribute;
     }
 }

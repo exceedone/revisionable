@@ -1,5 +1,5 @@
 {
-    "name": "venturecraft/revisionable",
+    "name": "exceedone/revisionable",
     "license": "MIT",
     "description": "Keep a revision history for your models without thinking, created as a package for use with Laravel",
     "keywords": ["model", "laravel", "ardent", "revision", "history"],
@@ -12,8 +12,8 @@
     ],
     "abandoned": true,
     "support": {
-        "issues": "https://github.com/VentureCraft/revisionable/issues",
-        "source": "https://github.com/VentureCraft/revisionable"
+        "issues": "https://github.com/exceedone/revisionable/issues",
+        "source": "https://github.com/exceedone/revisionable"
     },
     "require": {
         "php": ">=5.3.0",

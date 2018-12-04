@@ -1,3 +1,5 @@
+* This repository is forked by VentureCraft/revisionable. I fixed bug about comparing json value. 
+
 <img src="http://venturecraft.com.au/wp-content/uploads/2015/09/REVISIONABLE.png" style="width: 100%" alt="Revisionable" />
 
 [![Laravel 4.x](https://img.shields.io/badge/Laravel-4.x-brightgreen.svg?style=flat-square)](http://laravel.com)
