@@ -1,4 +1,5 @@
 * This repository is forked by VentureCraft/revisionable. I fixed bug about comparing json value. 
+* This repository is only for exceedone/exment.
 
 <img src="http://venturecraft.com.au/wp-content/uploads/2015/09/REVISIONABLE.png" style="width: 100%" alt="Revisionable" />
 

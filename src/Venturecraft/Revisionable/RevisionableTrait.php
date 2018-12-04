@@ -276,6 +276,10 @@ trait RevisionableTrait
                 || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
             ) {
                 return ($class::check()) ? $class::getUser()->id : null;
+            }
+            if (class_exists($class = '\Encore\Admin\Facades\Admin')
+            ) {
+                return (\Auth::guard('admin')->check()) ? ($class::user()->base_user_id ?? null) : null;
             } elseif (\Auth::check()) {
                 return \Auth::user()->getAuthIdentifier();
             }
